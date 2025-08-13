@@ -34,7 +34,8 @@ A machine learning web application that predicts the likelihood of chronic kidne
 
 
 # Navigate to project directory
-cd kidney-disease-prediction
+#cd kidney-disease-prediction
 
 # Install dependencies
-pip install -r requirements.txt
+
+#pip install -r requirements.txt

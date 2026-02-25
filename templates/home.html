@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CKD AI - Kidney Health Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="logo">CKD AI Analyzer</div>
+    <div class="nav-links">
+        <a href="#about">About</a>
+        <a href="#info">Kidney Info</a>
+        <button class="login-btn" onclick="openModal()">Login</button>
+    </div>
+</nav>
+
+<!-- HERO SECTION -->
+<section class="hero">
+
+    <div class="hero-content">
+        <h1>Understand Your Kidney Health</h1>
+        <p>AI Powered Chronic Kidney Disease Detection System</p>
+        <button class="cta-btn" onclick="openModal()">Check Kidney Test</button>
+    </div>
+
+    <!-- Moving Kidney Images -->
+    <div class="hero-images">
+        <img class="floating-img img1"
+             src="{{ url_for('static', filename='images/Screenshot_25-2-2026_193344.jpeg.jpeg') }}">
+
+        <img class="floating-img img2"
+             src="{{ url_for('static', filename='images/Screenshot 2026-02-25 194005.png') }}">
+
+        <img class="floating-img img3"
+             src="{{ url_for('static', filename='images/Screenshot 2026-02-25 194350.png') }}">
+    </div>
+
+</section>
+
+<!-- KIDNEY INFO SECTION -->
+<section id="info" class="info-section">
+    <h2>What is Chronic Kidney Disease (CKD)?</h2>
+    <div class="info-grid">
+        <div class="info-card">
+            <img src="{{ url_for('static', filename='images/Screenshot_25-2-2026_193344.jpeg.jpeg') }}">
+            <h3>Kidney Function</h3>
+            <p>Kidneys filter waste, control blood pressure, and maintain body balance.</p>
+        </div>
+
+        <div class="info-card">
+            <img src="{{ url_for('static', filename='images/Screenshot 2026-02-25 194005.png') }}">
+            <h3>CKD Progression</h3>
+            <p>CKD develops gradually and can lead to kidney failure if untreated.</p>
+        </div>
+
+        <div class="info-card">
+            <img src="{{ url_for('static', filename='images/Screenshot 2026-02-25 194350.png') }}">
+            <h3>Early Detection</h3>
+            <p>AI-based prediction helps detect CKD at early stages.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ABOUT SECTION -->
+<section id="about" class="about-section">
+    <h2>About This System</h2>
+    <p>
+        This platform uses Machine Learning (AdaBoost Model) to predict Chronic Kidney Disease 
+        based on 15 clinical parameters. It provides instant analysis and health risk assessment.
+    </p>
+</section>
+
+<!-- LOGIN / REGISTER MODAL -->
+<div id="authModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+
+        {% if error %}
+        <div class="error-message">{{ error }}</div>
+        {% endif %}
+
+        <div class="tabs">
+            <button onclick="showLogin()">Login</button>
+            <button onclick="showRegister()">Register</button>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <form id="loginForm" action="/login" method="POST">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+
+        <!-- REGISTER FORM -->
+        <form id="registerForm" action="/register" method="POST" style="display:none;">
+            <input type="text" name="username" placeholder="Create Username" required>
+            <input type="password" name="password" placeholder="Create Password" required>
+            <button type="submit">Register</button>
+        </form>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <p>© 2026 CKD AI Healthcare System | Built with Flask & Adaboost</p>
+</footer>
+
+<script>
+function openModal() {
+    document.getElementById("authModal").style.display = "flex";
+}
+function closeModal() {
+    document.getElementById("authModal").style.display = "none";
+}
+function showLogin() {
+    document.getElementById("loginForm").style.display = "block";
+    document.getElementById("registerForm").style.display = "none";
+}
+function showRegister() {
+    document.getElementById("loginForm").style.display = "none";
+    document.getElementById("registerForm").style.display = "block";
+}
+
+/* Floating Animation */
+const imgs = document.querySelectorAll(".floating-img");
+
+let direction = 1;
+let position = 0;
+
+function animateImages() {
+    position += direction * 0.4;
+
+    if (position > 25 || position < -25) {
+        direction *= -1;
+    }
+
+    imgs.forEach((img, index) => {
+        img.style.transform = `translateX(${position + (index * 15)}px)`;
+    });
+
+    requestAnimationFrame(animateImages);
+}
+
+animateImages();
+</script>
+
+</body>
+</html>

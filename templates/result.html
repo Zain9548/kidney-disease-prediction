@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CKD Risk Result</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+<section class="result-hero">
+    <h1>CKD Risk Assessment Result</h1>
+</section>
+
+<div class="result-container">
+    <div class="result-card">
+
+        {% if result == "Kidney Disease Detected" %}
+            <h2 class="risk-high">{{ result }}</h2>
+        {% else %}
+            <h2 class="risk-low">{{ result }}</h2>
+        {% endif %}
+
+        <div class="probability-section">
+            <div class="prob-box">
+                <h3>CKD Probability</h3>
+                <p>{{ prob_ckd }}%</p>
+            </div>
+
+            <div class="prob-box">
+                <h3>Normal Probability</h3>
+                <p>{{ prob_normal }}%</p>
+            </div>
+        </div>
+
+        <div class="meter">
+            <div class="meter-fill" style="width: {{ prob_ckd }}%;"></div>
+        </div>
+
+        <div class="btn-group">
+            <a href="/dashboard" class="btn">Create Health Dashboard</a>
+            <a href="/test" class="btn-secondary">Run New Test</a>
+        </div>
+
+    </div>
+</div>
+
+<footer>
+AI Healthcare System | CKD Risk Prediction
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,150 @@
+/* ================= GLOBAL ================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: white;
+    line-height: 1.6;
+}
+
+/* ================= HERO ================= */
+
+.test-hero {
+    text-align: center;
+    padding: 80px 20px 40px 20px;
+}
+
+.test-hero h1 {
+    font-size: 42px;
+    font-weight: 600;
+}
+
+.test-hero p {
+    margin-top: 10px;
+    font-size: 18px;
+    opacity: 0.85;
+}
+
+/* ================= CONTAINER ================= */
+
+.container {
+    padding: 40px 8%;
+    max-width: 1300px;
+    margin: auto;
+}
+
+/* ================= CARD ================= */
+
+.card {
+    background: rgba(255,255,255,0.08);
+    padding: 40px;
+    border-radius: 20px;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+}
+
+/* ================= HEADINGS ================= */
+
+h2 {
+    margin-bottom: 25px;
+    font-weight: 600;
+}
+
+h3 {
+    margin: 35px 0 20px 0;
+    font-weight: 500;
+}
+
+/* ================= GRID ================= */
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.grid-small {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 15px;
+}
+
+/* ================= INPUT ================= */
+
+input {
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    font-size: 14px;
+}
+
+/* ================= BUTTON ================= */
+
+.btn {
+    margin-top: 30px;
+    padding: 14px 30px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(90deg, #00c6ff, #0072ff);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    opacity: 0.9;
+}
+
+/* ================= FOOTER ================= */
+
+footer {
+    text-align: center;
+    padding: 30px;
+    margin-top: 40px;
+    opacity: 0.7;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 992px) {
+    .test-hero h1 {
+        font-size: 34px;
+    }
+}
+
+@media (max-width: 768px) {
+
+    .test-hero h1 {
+        font-size: 28px;
+    }
+
+    .test-hero p {
+        font-size: 16px;
+    }
+
+    .container {
+        padding: 30px 5%;
+    }
+
+}
+
+@media (max-width: 480px) {
+
+    .test-hero h1 {
+        font-size: 22px;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+}

@@ -1,122 +1,207 @@
-import streamlit as st
+from flask import Flask, render_template, request, redirect, session, url_for
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
 import joblib
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+import os
 
-# Load the saved model
-@st.cache_resource
-def load_model():
-    model = joblib.load('catboost_kidney_model.pkl')
-    return model
+# ================= APP CONFIG =================
+app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "ckd_super_secure_2026")
 
-model = load_model()
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ckd_app.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# App title
-st.title('Kidney Disease Prediction System')
-st.markdown("""
-This application predicts the likelihood of chronic kidney disease based on clinical parameters.
-""")
+db = SQLAlchemy(app)
 
-# Input fields in sidebar
-st.sidebar.header('Patient Parameters')
+# ================= DATABASE MODELS =================
 
-def user_input_features():
-    # Numerical parameters
-    st.sidebar.subheader('Numerical Values')
-    age = st.sidebar.slider('Age', 2, 100, 50)
-    bp = st.sidebar.slider('Blood Pressure (mmHg)', 50, 180, 80)
-    bgr = st.sidebar.slider('Blood Glucose Random (mg/dL)', 50, 500, 100)
-    bu = st.sidebar.slider('Blood Urea (mg/dL)', 10, 300, 30)
-    sc = st.sidebar.slider('Serum Creatinine (mg/dL)', 0.4, 20.0, 1.0)
-    sod = st.sidebar.slider('Sodium (mEq/L)', 100, 200, 140)
-    pot = st.sidebar.slider('Potassium (mEq/L)', 2.0, 8.0, 4.5)
-    hg = st.sidebar.slider('Hemoglobin (g/dL)', 3.0, 18.0, 12.0)
-    pcv = st.sidebar.slider('Packed Cell Volume (%)', 10, 60, 40)
-    wbcc = st.sidebar.slider('WBC Count (cells/cumm)', 2000, 20000, 8000)
-    rbcc = st.sidebar.slider('RBC Count (millions/cmm)', 2.0, 8.0, 5.0)
-    
-    # Categorical parameters (already encoded as 0/1)
-    st.sidebar.subheader('Categorical Values')
-    rbc = st.sidebar.radio('RBC (0=Normal, 1=Abnormal)', [0, 1])
-    pc = st.sidebar.radio('Pus Cell (0=Normal, 1=Abnormal)', [0, 1]) 
-    pcc = st.sidebar.radio('Pus Cell Clumps (0=No, 1=Yes)', [0, 1])
-    ba = st.sidebar.radio('Bacteria (0=No, 1=Yes)', [0, 1])
-    htn = st.sidebar.radio('Hypertension (0=No, 1=Yes)', [0, 1])
-    dm = st.sidebar.radio('Diabetes Mellitus (0=No, 1=Yes)', [0, 1])
-    cad = st.sidebar.radio('Coronary Artery Disease (0=No, 1=Yes)', [0, 1])
-    app = st.sidebar.radio('Appetite (0=Good, 1=Poor)', [0, 1])
-    pe = st.sidebar.radio('Pedal Edema (0=No, 1=Yes)', [0, 1])
-    ane = st.sidebar.radio('Anemia (0=No, 1=Yes)', [0, 1])
-    
-    # Specific gravity, albumin, sugar
-    sg = st.sidebar.selectbox('Specific Gravity', [1.005, 1.010, 1.015, 1.020, 1.025])
-    al = st.sidebar.selectbox('Albumin', [0, 1, 2, 3, 4, 5])
-    su = st.sidebar.selectbox('Sugar', [0, 1, 2, 3, 4, 5])
-    
-    data = {
-        'age': age,
-        'blood_pressure': bp,
-        'specific_gravity': sg,
-        'albumin': al,
-        'sugar': su,
-        'red_blood_cells': rbc,
-        'pus_cell': pc,
-        'pus_cell_clumps': pcc,
-        'bacteria': ba,
-        'blood_glucose_random': bgr,
-        'blood_urea': bu,
-        'serum_creatinine': sc,
-        'sodium': sod,
-        'potassium': pot,
-        'haemoglobin': hg,
-        'packed_cell_volume': pcv,
-        'white_blood_cell_count': wbcc,
-        'red_blood_cell_count': rbcc,
-        'hypertension': htn,
-        'diabetes_mellitus': dm,
-        'coronary_artery_disease': cad,
-        'appetite': app,
-        'peda_edema': pe,
-        'aanemia': ane
-    }
-    
-    return pd.DataFrame(data, index=[0])
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(150), unique=True, nullable=False)
+    password = db.Column(db.String(300), nullable=False)
 
-input_df = user_input_features()
 
-# Show input parameters
-st.subheader('Patient Input Parameters')
-st.write(input_df)
+class TestResult(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-# Prediction
-if st.button('Get Prediction'):
-    prediction = model.predict(input_df)
-    proba = model.predict_proba(input_df)
-    
-    st.subheader('Result')
-    result = 'Kidney Disease Detected' if prediction[0] == 0 else 'No Kidney Disease Detected'
-    st.success(f'Diagnosis: {result}')
-    
-    st.subheader('Probability')
-    st.write(f"Probability of Kidney Disease: {proba[0][0]:.2%}")
-    st.write(f"Probability of Normal: {proba[0][1]:.2%}")
-    
-    # Feature importance
-    if hasattr(model, 'feature_importances_'):
-        st.subheader('Feature Importance')
-        feat_importance = pd.DataFrame({
-            'Feature': input_df.columns,
-            'Importance': model.feature_importances_
-        }).sort_values('Importance', ascending=False)
-        
-        fig, ax = plt.subplots()
-        sns.barplot(x='Importance', y='Feature', data=feat_importance.head(10))
-        st.pyplot(fig)
+    age = db.Column(db.Float)
+    blood_pressure = db.Column(db.Float)
+    specific_gravity = db.Column(db.Float)
+    albumin = db.Column(db.Float)
+    sugar = db.Column(db.Float)
+    red_blood_cells = db.Column(db.Integer)
+    pus_cell = db.Column(db.Integer)
+    #pus_cell_clumps = db.Column(db.Integer)
+    #bacteria = db.Column(db.Integer)
+    blood_glucose_random = db.Column(db.Float)
+    blood_urea = db.Column(db.Float)
+    serum_creatinine = db.Column(db.Float)
+    #sodium = db.Column(db.Float)
+    #potassium = db.Column(db.Float)
+    haemoglobin = db.Column(db.Float)
+    packed_cell_volume = db.Column(db.Float)
+    #white_blood_cell_count = db.Column(db.Float)
+    red_blood_cell_count = db.Column(db.Float)
+    hypertension = db.Column(db.Integer)
+    diabetes_mellitus = db.Column(db.Integer)
+    #coronary_artery_disease = db.Column(db.Integer)
+    #appetite = db.Column(db.Integer)
+    #peda_edema = db.Column(db.Integer)
+    #aanemia = db.Column(db.Integer)
 
-# Footer
-st.markdown("""
----
-**Note**: This is only a prediction tool. Please consult a nephrologist for final diagnosis.
-""")
+    prediction = db.Column(db.String(50))
+    prob_ckd = db.Column(db.Float)
+    prob_normal = db.Column(db.Float)
+
+
+with app.app_context():
+    db.create_all()
+
+# ================= LOAD MODEL SAFELY =================
+MODEL_PATH = os.path.join("models", "adaboost_kidney_model.pkl")
+
+if not os.path.exists(MODEL_PATH):
+    raise FileNotFoundError("Model file not found inside models/ folder")
+
+model = joblib.load(MODEL_PATH)
+
+# ================= LOGIN REQUIRED DECORATOR =================
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "user_id" not in session:
+            return redirect(url_for("home"))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# ================= ROUTES =================
+
+@app.route("/")
+def home():
+    return render_template("home.html")
+
+
+@app.route("/register", methods=["POST"])
+def register():
+    username = request.form.get("username")
+    password = request.form.get("password")
+
+    if User.query.filter_by(username=username).first():
+        return render_template("home.html", error="Username already exists")
+
+    hashed_password = generate_password_hash(password)
+    new_user = User(username=username, password=hashed_password)
+
+    db.session.add(new_user)
+    db.session.commit()
+
+    return redirect(url_for("home"))
+
+
+@app.route("/login", methods=["POST"])
+def login():
+    username = request.form.get("username")
+    password = request.form.get("password")
+
+    user = User.query.filter_by(username=username).first()
+
+    if user and check_password_hash(user.password, password):
+        session["user_id"] = user.id
+        session["username"] = user.username
+        return redirect(url_for("test_page"))
+
+    return render_template("home.html", error="Invalid Credentials")
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("home"))
+
+
+@app.route("/test")
+@login_required
+def test_page():
+    return render_template("test.html")
+
+
+@app.route("/predict", methods=["POST"])
+@login_required
+def predict():
+    try:
+        input_data = {
+            'age': float(request.form['age']),
+            'blood_pressure': float(request.form['bp']),
+            'specific_gravity': float(request.form['sg']),
+            'albumin': float(request.form['al']),
+            'sugar': float(request.form['su']),
+            'red_blood_cells': int(request.form['rbc']),
+            'pus_cell': int(request.form['pc']),
+            #'pus_cell_clumps': int(request.form['pcc']),
+            #'bacteria': int(request.form['ba']),
+            'blood_glucose_random': float(request.form['bgr']),
+            'blood_urea': float(request.form['bu']),
+            'serum_creatinine': float(request.form['sc']),
+            #'sodium': float(request.form['sod']),
+            #'potassium': float(request.form['pot']),
+            'haemoglobin': float(request.form['hg']),
+            'packed_cell_volume': float(request.form['pcv']),
+            #'white_blood_cell_count': float(request.form['wbcc']),
+            'red_blood_cell_count': float(request.form['rbcc']),
+            'hypertension': int(request.form['htn']),
+            'diabetes_mellitus': int(request.form['dm']),
+            #'coronary_artery_disease': int(request.form['cad']),
+            #'appetite': int(request.form['app']),
+            #'peda_edema': int(request.form['pe']),
+            #'aanemia': int(request.form['ane'])
+        }
+
+        df = pd.DataFrame([input_data])
+
+        prediction = model.predict(df)[0]
+        probability = model.predict_proba(df)
+
+        result = "Kidney Disease Detected" if prediction == 0 else "No Kidney Disease"
+        prob_ckd = round(probability[0][0] * 100, 2)
+        prob_normal = round(probability[0][1] * 100, 2)
+
+        new_result = TestResult(
+            user_id=session["user_id"],
+            **input_data,
+            prediction=result,
+            prob_ckd=prob_ckd,
+            prob_normal=prob_normal
+        )
+
+        db.session.add(new_result)
+        db.session.commit()
+
+        return render_template(
+            "result.html",
+            result=result,
+            prob_ckd=prob_ckd,
+            prob_normal=prob_normal
+        )
+
+    except Exception as e:
+        return f"Prediction Error: {str(e)}"
+
+
+@app.route("/dashboard")
+@login_required
+def dashboard():
+    user_id = session["user_id"]
+    latest = TestResult.query.filter_by(user_id=user_id).order_by(TestResult.id.desc()).first()
+
+    if not latest:
+        return render_template("dashboard.html", message="No test history available")
+
+    return render_template("dashboard.html", data=latest)
+
+
+# ================= RUN =================
+if __name__ == "__main__":
+    app.run(debug=True)

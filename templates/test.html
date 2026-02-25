@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CKD Clinical Risk Assessment</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+</head>
+<body>
+
+<!-- HEADER SECTION -->
+<section class="test-hero">
+    <div class="test-hero-content">
+        <h1>Chronic Kidney Disease Risk Analysis</h1>
+        <p>Enter Complete Clinical Parameters for AI Evaluation</p>
+    </div>
+</section>
+
+<div class="container">
+
+<form action="/predict" method="POST" class="card">
+
+<h2>Patient Clinical Parameters</h2>
+
+<div class="grid">
+
+<input type="number" name="age" placeholder="Age" required>
+<input type="number" name="bp" placeholder="Blood Pressure" required>
+<input type="number" step="0.001" name="sg" placeholder="Specific Gravity" required>
+<input type="number" name="al" placeholder="Albumin" required>
+<input type="number" name="su" placeholder="Sugar" required>
+<input type="number" name="bgr" placeholder="Blood Glucose Random" required>
+<input type="number" name="bu" placeholder="Blood Urea" required>
+<input type="number" step="0.1" name="sc" placeholder="Serum Creatinine" required>
+<input type="number" step="0.1" name="hg" placeholder="Hemoglobin" required>
+<input type="number" name="pcv" placeholder="Packed Cell Volume" required>
+<input type="number" step="0.1" name="rbcc" placeholder="RBC Count" required>
+
+</div>
+
+<h3>Medical Conditions (0 = No, 1 = Yes)</h3>
+
+<div class="grid-small">
+<input type="number" name="rbc" min="0" max="1" placeholder="Red Blood Cells">
+<input type="number" name="pc" min="0" max="1" placeholder="Pus Cell">
+<input type="number" name="htn" min="0" max="1" placeholder="Hypertension">
+<input type="number" name="dm" min="0" max="1" placeholder="Diabetes Mellitus">
+</div>
+
+<button type="submit" class="btn">Analyze Risk</button>
+
+</form>
+
+</div>
+
+<footer>
+AI Healthcare System | CKD Risk Assessment | Flask + CatBoost
+</footer>
+
+</body>
+</html>

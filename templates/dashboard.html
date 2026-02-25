@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>CKD Health Dashboard</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+
+<body>
+
+<h1>CKD AI Health Dashboard</h1>
+
+<div class="dashboard-grid">
+
+{% set features = [
+("Age", data.age, 0, 100),
+("Blood Pressure", data.blood_pressure, 80, 120),
+("Specific Gravity", data.specific_gravity, 1.005, 1.025),
+("Albumin", data.albumin, 0, 1),
+("Sugar", data.sugar, 0, 1),
+("Blood Glucose", data.blood_glucose_random, 70, 140),
+("Blood Urea", data.blood_urea, 15, 40),
+("Serum Creatinine", data.serum_creatinine, 0.6, 1.3),
+("Hemoglobin", data.haemoglobin, 12, 17),
+("PCV", data.packed_cell_volume, 36, 50),
+("RBC Count", data.red_blood_cell_count, 4.0, 6.0),
+("Hypertension", data.hypertension, 0, 0),
+("Diabetes", data.diabetes_mellitus, 0, 0),
+("RBC (Urine)", data.red_blood_cells, 0, 0),
+("Pus Cell", data.pus_cell, 0, 0)
+
+] %}
+
+{% for name, value, min_val, max_val in features %}
+
+{% set is_normal = (value >= min_val and value <= max_val) %}
+<div class="circle-card">
+
+    <div class="circle {{ 'green' if is_normal else 'red' }}">
+        <span>{{ value }}</span>
+    </div>
+
+    <h3>{{ name }}</h3>
+    <p>Normal Range: {{ min_val }} - {{ max_val }}</p>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</body>
+</html>
